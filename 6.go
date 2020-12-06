@@ -1,29 +1,60 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func main6() {
 	input := getDeclarationForms()
+	newGroup := false
+	var groups []string
+	group := ""
 
-	newGroup := true
-	answeredTotal := 0
-	answered := make(map[string]struct{}) // maps have unique keys
+	// easier to parse group array
 	for i, row := range input {
-		if len(row) == 0 || i == len(input)-1 {
-			answeredTotal += len(answered)
+		if len(row) == 0 {
 			newGroup = true
-			continue
+		} else {
+			group += row + "\n"
 		}
 
-		if newGroup == true {
-			answered = make(map[string]struct{})
+		if newGroup == true || i == len(input)-1 {
+			groups = append(groups, group)
+			group = ""
 			newGroup = false
-		}
-
-		for _, char := range row {
-			answered[string(char)] = struct{}{}
 		}
 	}
 
-	fmt.Println("part 1:", answeredTotal, "questions answered in total")
+	answeredByAnyone := 0
+	for _, group := range groups {
+		answered := make(map[string]struct{})
+		for _, char := range group {
+			if string(char) == "\n" {
+				continue
+			}
+			answered[string(char)] = struct{}{}
+		}
+		answeredByAnyone += len(answered)
+	}
+
+	fmt.Println("part 1:", answeredByAnyone, "questions anyone answered") // 6778
+
+	answeredByEveryone := 0
+	for _, group := range groups {
+		var answered []interface{}
+		persons := strings.Split(group, "\n")
+		for pid, person := range persons {
+			if pid == 0 {
+				for _, answer := range person {
+					answered = append(answered, answer)
+				}
+			} else if len(person) != 0 {
+				answered = intersect(answered, []rune(person))
+			}
+		}
+		answeredByEveryone += len(answered)
+	}
+
+	fmt.Println("part 2:", answeredByEveryone, "questions everybody answered")
 }
