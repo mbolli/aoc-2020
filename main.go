@@ -1,5 +1,5 @@
 package main
 
 func main() {
-	main6()
+	main7()
 }
